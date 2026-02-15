@@ -1,17 +1,28 @@
-name: Deploy to Vercel
+name: Automated Vercel Deployment
 
 on:
   push:
-    branches: [master]
+    branches: [main]  # 當 OpenClaw 推送到 main 分支時觸發
 
 jobs:
-  deploy:
+  deploy-to-vercel:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run build
-      - run: npx vercel deploy --token ${{ secrets.VERCEL_TOKEN }} --name ${{ github.event.repository.name }} --prod --yes
+      
+      - name: Install Vercel CLI
+        run: npm install --global vercel
+      
+      - name: Pull Vercel Environment Information
+        # 使用 --name 確保即使專案未在 Vercel 建立，也會自動以 Repo 名稱創立
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --name=${{ github.event.repository.name }}
+      
+      - name: Build and Deploy to Vercel
+        # --prod 代表發布到正式環境，--yes 代表自動跳過所有確認提問
+        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --name=${{ github.event.repository.name }}
