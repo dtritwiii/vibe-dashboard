@@ -2,7 +2,7 @@ name: Automated Vercel Deployment
 
 on:
   push:
-    branches: [main]  # 當 OpenClaw 推送到 main 分支時觸發
+    branches: [main]
 
 jobs:
   deploy-to-vercel:
@@ -16,13 +16,11 @@ jobs:
         with:
           node-version: 20
       
-      - name: Install Vercel CLI
-        run: npm install --global vercel
+      - name: Install Dependencies
+        run: npm install
       
-      - name: Pull Vercel Environment Information
-        # 使用 --name 確保即使專案未在 Vercel 建立，也會自動以 Repo 名稱創立
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --name=${{ github.event.repository.name }}
+      - name: Build Project
+        run: npm run build
       
-      - name: Build and Deploy to Vercel
-        # --prod 代表發布到正式環境，--yes 代表自動跳過所有確認提問
-        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} --name=${{ github.event.repository.name }}
+      - name: Deploy to Vercel
+        run: npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
